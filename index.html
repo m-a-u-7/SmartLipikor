@@ -6,8 +6,8 @@
   <title>Smart Lipikor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;family=Noto+Sans+Bengali:wght@400;500;600;700&amp;family=Hind+Siliguri:wght@400;500;600;700&amp;family=Baloo+Da+2:wght@400;500;600;700&amp;family=Tiro+Bangla:wght@400&amp;family=Noto+Naskh+Arabic:wght@400;500;600;700&amp;family=Noto+Sans+Arabic:wght@400;500;600;700&amp;family=Cairo:wght@400;500;600;700&amp;family=Lateef:wght@400;700&amp;family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Lato:ital,wght@0,400;0,700;1,400&amp;family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Merriweather:ital,wght@0,400;0,700;1,400&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Source+Code+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Baloo+Da+2:wght@400;500;600;700&family=Tiro+Bangla:wght@400&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&family=Cairo:wght@400;500;600;700&family=Lateef:wght@400;700&family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Lato:ital,wght@0,400;0,700;1,400&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Roboto', 'Open Sans', sans-serif; /* General fallback */
@@ -50,27 +50,28 @@
       border-radius: 3px;
     }
   </style>
-  <script type="importmap">
-  {
+<script type="importmap">
+{
   "imports": {
-    "@/App": "/App.tsx",
-    "@/services/exportService": "/services/exportService.ts",
-    "react/": "https://esm.sh/react@^19.1.0/",
     "react": "https://esm.sh/react@^19.1.0",
     "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.6.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.522.0",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^0.15.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.518.0",
+    "docx": "https://esm.sh/docx@^9.5.1",
+    "jspdf": "https://esm.sh/jspdf@^3.0.1",
     "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
     "file-saver": "https://esm.sh/file-saver@^2.0.5",
-    "docx": "https://esm.sh/docx@^9.5.1",
-    "jspdf": "https://esm.sh/jspdf@^3.0.1"
+    "@/App": "./App.tsx",
+    "@/services/exportService": "./services/exportService.ts"
   }
-  }
-  </script>
-  <link rel="stylesheet" href="/index.css">
+}
+</script>
+<link rel="stylesheet" href="/index.css">
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-black to-slate-900 text-slate-200 min-h-screen flex flex-col">
   <div id="root" class="flex-grow flex flex-col"></div>
-  <script type="module" src="/index.tsx"></script>
+  <script type="module" src="./index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
