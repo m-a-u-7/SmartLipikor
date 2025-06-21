@@ -16,7 +16,25 @@ import { ChatWithAI } from './components/ChatWithAI'; // New component
 import { generateDocx, generatePdf, generateImage } from '@/services/exportService'; 
 import { Eye, EyeOff } from 'lucide-react'; // For Print Layout Toggle
 
-const API_KEY = process.env.API_KEY;
+let apiKeyFromEnv: string | undefined = undefined;
+let nodeEnv: string | undefined = undefined;
+
+try {
+  // Check if globalThis and process and process.env are available
+  if (typeof globalThis !== 'undefined' && 
+      globalThis.process && 
+      typeof globalThis.process.env === 'object' && 
+      globalThis.process.env !== null) {
+    apiKeyFromEnv = globalThis.process.env.API_KEY;
+    nodeEnv = globalThis.process.env.NODE_ENV;
+  }
+} catch (e) {
+  // This catch block is a fallback for unusual environments where accessing globalThis.process might throw.
+  // The primary checks above should prevent most errors.
+  console.warn("Could not access process.env. API key and NODE_ENV might not be available directly.", e);
+}
+
+const API_KEY = apiKeyFromEnv;
 let ai: GoogleGenAI | undefined;
 
 if (API_KEY) {
@@ -28,17 +46,13 @@ if (API_KEY) {
   }
 } else {
   let isTestEnvironment = false;
-  try {
-    // Safely check for test environment
-    if (process && process.env && process.env.NODE_ENV === "test") {
-      isTestEnvironment = true;
-    }
-  } catch (e) {
-    // If process.env is not accessible, assume it's not a test environment for warning purposes.
+  // Use the safely retrieved nodeEnv
+  if (nodeEnv === "test") {
+    isTestEnvironment = true;
   }
 
   if (!isTestEnvironment) {
-    console.warn("API Key (API_KEY in process.env) is not set. The application will not be able to connect to the Gemini API.");
+    console.warn("API Key (API_KEY in process.env) is not set or process.env is not accessible. The application will not be able to connect to the Gemini API.");
   }
 }
 
@@ -66,15 +80,15 @@ PAY EXTREME, METICULOUS ATTENTION TO:
   - **MULTIPLE SPACES:** If you visually detect a sequence of two or more spaces, you MUST preserve ALL of those spaces in the JSON string. Do NOT collapse them into a single space.
   - **Distinguishing Tabs from Spaces:** If it's visually ambiguous whether an indentation is a tab or multiple spaces, use your best judgment. If it creates a clear, sharp indentation typical of a tab stop, prefer '\\t'. Otherwise, represent the visible spaces.
 - TABLE STRUCTURES: Including cells, rows, headers, merged cells, borders (style, color, width), and cell backgrounds.
-- NUMERALS AND SYMBOLS: Accurate transcription of all numerals (e.g., 123, IV, ১০), ordinal indicators (e.g., 1st, 2nd, ৩য়, ১ম), mathematical symbols (e.g., E = mc², H₂O), currency symbols (e.g., $, €, £, ₹), and other special characters is ABSOLUTELY CRITICAL.
-- EMOJIS: Flawless recognition and transcription of emojis as Unicode characters (e.g., ✨, €, ✓, 🤔).
+- NUMERALS AND SYMBOLS: Accurate transcription of all numerals (e.g., 123, IV, рззрзж), ordinal indicators (e.g., 1st, 2nd, рзйржпрж╝, рззржо), mathematical symbols (e.g., E = mc┬▓, HтВВO), currency symbols (e.g., $, тВм, ┬г, тВ╣), and other special characters is ABSOLUTELY CRITICAL.
+- EMOJIS: Flawless recognition and transcription of emojis as Unicode characters (e.g., тЬи, тВм, тЬУ, ЁЯдФ).
 
 These visual details are PARAMOUNT for accurately replicating the original document's appearance. YOUR RESPONSES WILL BE STRICTLY EVALUATED ON THE ABSOLUTE ACCURACY OF THE EXTRACTED VERBATIM TEXT (even from challenging, blurry, or handwritten sources) AND THE FAITHFUL, PIXEL-PERFECT REPLICATION OF ALL VISUAL FORMATTING DETAILS. Adherence to the specified JSON output structure is mandatory.
 
 BENGALI FONT HANDLING: For Bengali text, the application will often override the font family to 'Tiro Bangla' or a similar consistent Bengali font for display purposes. However, you MUST still accurately detect and report the *original visual font characteristics* as best as possible in the \`fontFamilySuggestion\` or \`fontFamily\` fields (e.g., if it looks like 'SutonnyMJ' or a generic 'bengali-serif'), along with all other formatting attributes like bold, color, size, etc.
 
 UNCERTAINTY AND ILLEGIBILITY:
-While striving for perfect accuracy, if you infer a word but retain significant uncertainty (even after contextual analysis limited to deciphering visually ambiguous parts, and after considering the minor correction rule), you MUST mark this word by setting \`isUncertain: true\` in its TextSpan and prepending the appropriate language-specific uncertainty marker (e.g., \`[অনিশ্চিত: ]\`, \`[uncertain: ]\`, \`[غير مؤكد: ]\`) to the text of that span, as detailed in the TextSpan structure. This is distinct from completely illegible text. If a character or word is COMPLETELY ILLEGIBLE and cannot be contextually inferred even from immediate surroundings, use '[অস্পষ্ট]' (for Bengali), '[illegible]' (for English), or '[غير واضح]' (for Arabic) as the SOLE content of this 'text' field for that span (and 'isUncertain' should be false or omitted).
+While striving for perfect accuracy, if you infer a word but retain significant uncertainty (even after contextual analysis limited to deciphering visually ambiguous parts, and after considering the minor correction rule), you MUST mark this word by setting \`isUncertain: true\` in its TextSpan and prepending the appropriate language-specific uncertainty marker (e.g., \`[ржЕржирж┐рж╢рзНржЪрж┐ржд: ]\`, \`[uncertain: ]\`, \`[╪║┘К╪▒ ┘Е╪д┘Г╪п: ]\`) to the text of that span, as detailed in the TextSpan structure. This is distinct from completely illegible text. If a character or word is COMPLETELY ILLEGIBLE and cannot be contextually inferred even from immediate surroundings, use '[ржЕрж╕рзНржкрж╖рзНржЯ]' (for Bengali), '[illegible]' (for English), or '[╪║┘К╪▒ ┘И╪з╪╢╪н]' (for Arabic) as the SOLE content of this 'text' field for that span (and 'isUncertain' should be false or omitted).
 
 FINAL VERIFICATION & JSON STRUCTURE:
 Analyze the provided image with EXTREME METICULOUSNESS to extract text content and its detailed formatting. THE PRIMARY GOAL IS TO REPLICATE THE VISUAL APPEARANCE, STRUCTURE, AND TYPOGRAPHY of the text as closely as humanly possible, based strictly on the visual information.
@@ -138,7 +152,7 @@ Each TableCell object MUST follow this structure:
 --- TextSpan STRUCTURE (within "spans" array of paragraph/heading blocks, "caption" array of table blocks, AND "content" array of TableCell objects) ---
 Each TextSpan object MUST follow this structure:
 {
-  "text": "The exact text content. Transcribe with EXTREME PRECISION. **CRITICAL WHITESPACE: For visually detected tab characters, YOU MUST use '\\\\t'. For visually detected sequences of multiple spaces, YOU MUST preserve ALL of them.** For line breaks within a single conceptual span, use '\\\\n'. NUMERALS, ORDINALS, SYMBOLS, EMOJIS, MATH, CHEMICAL FORMULAS: Transcribe ALL with absolute precision as previously detailed. CRITICAL FOR PARTIALLY LEGIBLE/AMBIGUOUS TEXT: If 'isUncertain' is true, this 'text' field MUST contain your best guess for the word/phrase (derived ONLY from visual cues and immediate context, NOT general knowledge), PREPENDED with the language-specific uncertainty marker: '[অনিশ্চিত: ]' for Bengali (e.g., '[অনিশ্চিত: ]আলো'), '[uncertain: ]' for English (e.g., '[uncertain: ]light'), or '[غير مؤكد: ]' for Arabic (e.g., '[غير مؤكد: ]ضوء'). The marker includes a colon and a space before the guessed word. If a character or word is COMPLETELY ILLEGIBLE and cannot be contextually inferred even from immediate surroundings, use '[অস্পষ্ট]' (for Bengali), '[illegible]' (for English), or '[غير واضح]' (for Arabic) as the SOLE content of this 'text' field for that span (and 'isUncertain' should be false or omitted). DO NOT USE GENERAL KNOWLEDGE TO FILL GAPS OR CORRECT APPARENT ERRORS IN THE IMAGE.",
+  "text": "The exact text content. Transcribe with EXTREME PRECISION. **CRITICAL WHITESPACE: For visually detected tab characters, YOU MUST use '\\\\t'. For visually detected sequences of multiple spaces, YOU MUST preserve ALL of them.** For line breaks within a single conceptual span, use '\\\\n'. NUMERALS, ORDINALS, SYMBOLS, EMOJIS, MATH, CHEMICAL FORMULAS: Transcribe ALL with absolute precision as previously detailed. CRITICAL FOR PARTIALLY LEGIBLE/AMBIGUOUS TEXT: If 'isUncertain' is true, this 'text' field MUST contain your best guess for the word/phrase (derived ONLY from visual cues and immediate context, NOT general knowledge), PREPENDED with the language-specific uncertainty marker: '[ржЕржирж┐рж╢рзНржЪрж┐ржд: ]' for Bengali (e.g., '[ржЕржирж┐рж╢рзНржЪрж┐ржд: ]ржЖрж▓рзЛ'), '[uncertain: ]' for English (e.g., '[uncertain: ]light'), or '[╪║┘К╪▒ ┘Е╪д┘Г╪п: ]' for Arabic (e.g., '[╪║┘К╪▒ ┘Е╪д┘Г╪п: ]╪╢┘И╪б'). The marker includes a colon and a space before the guessed word. If a character or word is COMPLETELY ILLEGIBLE and cannot be contextually inferred even from immediate surroundings, use '[ржЕрж╕рзНржкрж╖рзНржЯ]' (for Bengali), '[illegible]' (for English), or '[╪║┘К╪▒ ┘И╪з╪╢╪н]' (for Arabic) as the SOLE content of this 'text' field for that span (and 'isUncertain' should be false or omitted). DO NOT USE GENERAL KNOWLEDGE TO FILL GAPS OR CORRECT APPARENT ERRORS IN THE IMAGE.",
   "isBold": boolean, // CRITICALLY IMPORTANT. Set to 'true' if the text is visually BOLD. Missing or incorrect bolding is a significant error.
   "isItalic": boolean,
   "fontFamily": "VISUAL ACCURACY IS PARAMOUNT. CRITICAL: Identify the *EXACT* font name if possible (e.g., 'Arial', 'SutonnyMJ'). If impossible, provide a *visually closest generic category* (e.g., 'bengali-traditional', 'arabic-naskh', 'serif'). AVOID 'unknown' unless absolutely no visual cues exist.",
@@ -146,7 +160,7 @@ Each TextSpan object MUST follow this structure:
   "color": "VISUAL ACCURACY FOR COLOR IS PARAMOUNT. Provide the *exact* Hex color code (e.g., '#FF0000'). Mistakes in color extraction are highly undesirable.",
   "textDecoration": "none" | "underline" | "line-through",
   "fontStyleAttributes": ["string"], // Optional visual attributes like 'condensed', 'expanded', 'small-caps'.
-  "isUncertain": boolean // CRITICALLY IMPORTANT FOR AMBIGUOUS TEXT: Set to 'true' if you are not completely confident in the transcription of this span, even after contextual analysis (limited to visual cues) and providing your best guess in the 'text' field (which will be prepended with the uncertainty marker). Set to 'false' or omit if confident or if the text is completely illegible (using placeholders like '[অস্পষ্ট]').
+  "isUncertain": boolean // CRITICALLY IMPORTANT FOR AMBIGUOUS TEXT: Set to 'true' if you are not completely confident in the transcription of this span, even after contextual analysis (limited to visual cues) and providing your best guess in the 'text' field (which will be prepended with the uncertainty marker). Set to 'false' or omit if confident or if the text is completely illegible (using placeholders like '[ржЕрж╕рзНржкрж╖рзНржЯ]').
 }
 
 FONT SIZE CATEGORY (fontSizeCategory), LINE HEIGHT (lineHeight), SPACE AFTER PARAGRAPH (spaceAfter): Detailed instructions as per previous prompt. CRITICAL FOR VISUAL ACCURACY.
@@ -159,15 +173,15 @@ const promptPart3 = `
   { 
     "id": "b1", "blockType": "heading1", "language": "bn", "alignment": "center", "fontSizeCategory": "pt22", 
     "fontFamilySuggestion": "bengali", "lineHeight": "1.3", "spaceAfter": "12pt",
-    "spans": [{ "text": "বিজ্ঞান ভবন, বর্ষ সংখ্যা ৫ ✨ €URO ✓ 🤔", "isBold": true, "isItalic": false, "fontFamily": "bengali-traditional", "fontWeight": 700, "color": "#1A2B3C", "textDecoration": "none", "fontStyleAttributes": [], "isUncertain": false }]
+    "spans": [{ "text": "ржмрж┐ржЬрзНржЮрж╛ржи ржнржмржи, ржмрж░рзНрж╖ рж╕ржВржЦрзНржпрж╛ рзл тЬи тВмURO тЬУ ЁЯдФ", "isBold": true, "isItalic": false, "fontFamily": "bengali-traditional", "fontWeight": 700, "color": "#1A2B3C", "textDecoration": "none", "fontStyleAttributes": [], "isUncertain": false }]
   },
   {
     "id": "b_uncertain", "blockType": "paragraph", "language": "bn", "alignment": "left", "fontSizeCategory": "pt12",
     "fontFamilySuggestion": "bengali", "lineHeight": "1.5", "spaceAfter": "6pt",
     "spans": [
-      { "text": "এটি একটি ", "isBold": false, "fontWeight": 400, "color": "#333333", "isUncertain": false },
-      { "text": "[অনিশ্চিত: ]সন্দেহজনক", "isBold": false, "fontWeight": 400, "color": "#333333, "isUncertain": true },
-      { "text": " শব্দ।", "isBold": false, "fontWeight": 400, "color": "#333333", "isUncertain": false }
+      { "text": "ржПржЯрж┐ ржПржХржЯрж┐ ", "isBold": false, "fontWeight": 400, "color": "#333333", "isUncertain": false },
+      { "text": "[ржЕржирж┐рж╢рзНржЪрж┐ржд: ]рж╕ржирзНржжрзЗрж╣ржЬржиржХ", "isBold": false, "fontWeight": 400, "color": "#333333, "isUncertain": true },
+      { "text": " рж╢ржмрзНржжред", "isBold": false, "fontWeight": 400, "color": "#333333", "isUncertain": false }
     ]
   },
   { 
@@ -175,7 +189,7 @@ const promptPart3 = `
     "caption": [{ "text": "Product Sales Q1", "isBold": true, "fontFamily": "sans-serif", "fontWeight": 600, "color": "#000000", "isUncertain": false}],
     "rows": [
       { "id": "t1r1", "cells": [
-        { "id": "t1r1c1", "isHeader": true, "content": [{ "text": "Product ID ©", "isBold": true, "fontWeight": 700, "isUncertain": false }], "alignment": "left" },
+        { "id": "t1r1c1", "isHeader": true, "content": [{ "text": "Product ID ┬й", "isBold": true, "fontWeight": 700, "isUncertain": false }], "alignment": "left" },
         { "id": "t1r1c2", "isHeader": true, "content": [{ "text": "Name", "isBold": true, "fontWeight": 700, "isUncertain": false }], "alignment": "left" },
         { "id": "t1r1c3", "isHeader": true, "content": [{ "text": "[uncertain: ]Units Sold?", "isBold": true, "fontWeight": 700, "isUncertain": true }], "alignment": "right" }
       ]},
@@ -190,8 +204,8 @@ const promptPart3 = `
     "id": "b2", "blockType": "paragraph", "language": "en", "alignment": "justify", "fontSizeCategory": "pt11",
     "fontFamilySuggestion": "serif", "lineHeight": "1.6", "spaceAfter": "8pt",
     "spans": [
-        { "text": "The equation is E = mc².", "fontFamily": "serif", "fontWeight": 400, "color": "#222222", "isUncertain": false },
-        { "text": " Water is H₂O. Illegible part: [illegible].", "fontFamily": "serif", "fontWeight": 400, "color": "#222222", "isUncertain": false }
+        { "text": "The equation is E = mc┬▓.", "fontFamily": "serif", "fontWeight": 400, "color": "#222222", "isUncertain": false },
+        { "text": " Water is HтВВO. Illegible part: [illegible].", "fontFamily": "serif", "fontWeight": 400, "color": "#222222", "isUncertain": false }
     ]
   }
 ]
