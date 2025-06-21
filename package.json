@@ -1,0 +1,22 @@
+{
+  "name": "smart-lipikor-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"Development server not configured. Serve index.html statically.\"",
+    "build": "echo \"No build step configured. Files are served as is.\"",
+    "start": "echo \"Start script not configured. Serve index.html statically.\""
+  },
+  "dependencies": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom": "https://esm.sh/react-dom@^19.1.0",
+    "@google/genai": "https://esm.sh/@google/genai@^0.15.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.518.0",
+    "docx": "https://esm.sh/docx@^9.5.1",
+    "jspdf": "https://esm.sh/jspdf@^3.0.1",
+    "html2canvas": "https://esm.sh/html2canvas@^1.4.1",
+    "file-saver": "https://esm.sh/file-saver@^2.0.5"
+  },
+  "devDependencies": {}
+}
